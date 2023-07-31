@@ -15,7 +15,7 @@ function AuthProvider({ children }) {
       localStorage.setItem("@rocketnotes:user", JSON.stringify(user))
       localStorage.setItem("@rocketnotes:token", token)
 
-      api.defaults.headers.common[authorization] = `Bearer ${token}`
+      api.defaults.headers.common["authorization"] = `Bearer ${token}`
       setData({ user, token })
 
     } catch(error) {
@@ -34,12 +34,37 @@ function AuthProvider({ children }) {
     setData({})
   }
 
+  async function updateProfile({ user, avatarFile }) {
+    try {
+
+      if(avatarFile) {
+        const fileUploadForm = new FormData()
+        fileUploadForm.append("avatar", avatarFile)
+
+        const response = await api.patch("/users/avatar", fileUploadForm)
+        user.avatar = response.data.avatar
+      }
+
+      await api.put("/users", user)
+      localStorage.setItem("@rocketnotes:user", JSON.stringify(user))
+      setData({ user, token: data.token })
+      alert("Updated profile")
+
+    } catch (error) {
+      if(error.response) {
+        alert(error.response.message)
+      } else {
+        alert("Unable to update the profile!")
+      }
+    }
+  }
+
   useEffect(() => {
     const user = localStorage.getItem("@rocketnotes:user")
     const token = localStorage.getItem("@rocketnotes:token")
 
     if(user && token) {
-      api.defaults.headers.common[authorization] = `Bearer ${token}`
+      api.defaults.headers.common["authorization"] = `Bearer ${token}`
 
       setData({
         user: JSON.parse(user),
@@ -52,6 +77,7 @@ function AuthProvider({ children }) {
   <AuthContext.Provider value={{ 
     signIn,
     signOut,
+    updateProfile,
     user: data.user }}>
     {children}
   </AuthContext.Provider>
