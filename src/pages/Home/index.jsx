@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import {useNavigate} from 'react-router-dom'
 import { api } from '../../services/api'
 
 import { FiPlus } from 'react-icons/fi'
@@ -17,6 +18,8 @@ export function Home() {
     const [search, setSearch] = useState("")
     const [notes, setNotes] = useState([])
 
+    const navigate = useNavigate()
+
     function handleTagsSelected(tagName) {
         if(tagName === "all") {
             return setTagsSelected([])
@@ -30,6 +33,10 @@ export function Home() {
         }else {
             setTagsSelected(prevState => [...prevState, tagName ]);
         }
+    }
+
+    function handleDetails(id) {
+        navigate(`/details/${id}`)
     }
 
 
@@ -63,7 +70,7 @@ export function Home() {
             <Menu>
                 <li><ButtonText 
                         title="All" 
-                        onClick={() => handleTagsSelected("All")}
+                        onClick={() => handleTagsSelected("all")}
                         isActive={tagsSelected.length === 0}
                     />
                 </li>
@@ -84,7 +91,7 @@ export function Home() {
             <Search>
                 <Input 
                     placeholder="Search a title"
-                    onChange={() => setSearch(e.target.value)}
+                    onChange={(e) => setSearch(e.target.value)}
                 />
             </Search>
 
@@ -95,6 +102,7 @@ export function Home() {
                             <Note 
                                 key={String(note.id)}
                                 data={note} 
+                                onClick={() => handleDetails(note.id)}
                             />
                         ))
                     }
